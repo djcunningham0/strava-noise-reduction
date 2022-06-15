@@ -26,8 +26,7 @@ def create_app() -> Flask:
             authorization_endpoint="http://www.strava.com/oauth/authorize",
             token_endpoint="https://www.strava.com/api/v3/oauth/token",
             userinfo_endpoint="athlete",
-            redirect_uri="http://127.0.0.1:5000/auth/strava_auth",  # TODO need this?
-            client_kwargs={
+            ,client_kwargs={
                 'response_type': 'code',
                 'scope': 'read,read_all,profile:read_all,activity:read_all',
                 'token_endpoint_auth_method': 'client_secret_post',
