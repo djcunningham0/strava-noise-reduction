@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+
+{% block content %}
+  <hr>
+  <form name="api-request" method="post" action="{{ url_for('dev.strava_api') }}">
+    <label for="endpoint">API endpoint (no leading "/")</label>
+    <input name="endpoint" id="endpoint">
+    <label for="params">params</label>
+    <textarea name="params" id="params">{}</textarea>
+    <input type="submit">
+  </form>
+{% endblock %}

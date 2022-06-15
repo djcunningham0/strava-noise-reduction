@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h2>{{ data["name"] }} ({{ data["start_date_local"][:10] }})</h2>
+
+<form name="activities" method="post" action="{{ url_for('activity.activity_info') }}">
+    {# pass activity-data as hidden input so it's available for submitting in a new request #}
+    <input type="hidden" name="activity-id" id="activity-id" value="{{ data['id'] }}">
+    <div class="row">
+        <div class="column4">
+            <label for="uncertainty-pos">Position uncertainty (ft)</label>
+            <input type="number" id="uncertainty-pos" name="uncertainty-pos" min="1" value="10">
+        </div>
+        <div class="column4">
+            <label for="uncertainty-velo">Velocity uncertainty (ft/s)</label>
+            <input type="number" id="uncertainty-velo" name="uncertainty-velo" min="1" value="20">
+        </div>
+        <div class="column4">
+            <label for="process-uncertainty">Process uncertainty</label>
+            <input type="number" id="process-uncertainty" name="process-uncertainty" value="1e-9" step="1e-9">
+        </div>
+        <div class="column4">
+            <label for="state-uncertainty">Process uncertainty</label>
+            <input type="number" id="state-uncertainty" name="state-uncertainty" value="10">
+        </div>
+        <button type="submit" class="btn btn-default">Recalculate</button>
+    </div>
+</form>
+
+<p id='chart' class='chart'></p>
+<h2>Original Activity</h2>
+<p>distance: {{ meters_to_miles(data["distance"]) | round(2) }} miles</p>
+<p>elevation gain: {{ meters_to_feet(data["total_elevation_gain"]) | round | int }} feet</p>
+<p>moving time: {{ seconds_to_time(data["moving_time"]) }}</p>
+<p>elapsed time: {{ seconds_to_time(data["elapsed_time"]) }}</p>
+<p>moving pace: {{ seconds_to_time(data["moving_time"] / meters_to_miles(data["distance"])) }}</p>
+<p>elapsed pace: {{ seconds_to_time(data["elapsed_time"] / meters_to_miles(data["distance"])) }}</p>
+<p>average speed: {{ meters_per_second_to_mph(data["average_speed"]) | round(1) }} mph</p>
+<p>max speed: {{ meters_per_second_to_mph(data["max_speed"]) | round(1) }} mph</p>
+
+{# <td><pre>{{ pretty_print_json(data) }}</pre></td> #} {# include this to print out all the activity data #}
+{% endblock %}
+
+{% block content2 %}{% endblock %}
+
+{% block endcontent %}
+<script src='https://cdn.plot.ly/plotly-latest.min.js'></script>
+<script type='text/javascript'>
+  var graphs = {{ plot_json|safe }};
+  Plotly.plot('chart',graphs,{});
+</script>
+{% endblock %}

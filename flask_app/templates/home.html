@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+
+{% block content %}
+  {% if g.user %}
+    <h1>Hello {{ g.user.get("firstname") or g.user.get("username") or "" }}!</h1>
+    <img src="{{ g.user.profile }}" alt="user_image">
+    <h2>Stats</h2>
+    <p>Run: {{ g.user.get("stats", {}).get("all_run_totals", {}).get("count", 0) }} total --
+      {{ (g.user.get("stats", {}).get("all_run_totals", {}).get("distance", 0) / 1609.34)|round(1) }} miles</p>
+    <p>Bike: {{ g.user.get("stats", {}).get("all_ride_totals", {}).get("count", 0) }} total --
+      {{ (g.user.get("stats", {}).get("all_ride_totals", {}).get("distance", 0) / 1609.34)|round(1) }} miles</p>
+    <p>Swim: {{ g.user.get("stats", {}).get("all_swim_totals", {}).get("count", 0) }} total --
+      {{ (g.user.get("stats", {}).get("all_swim_totals", {}).get("distance", 0) / 1609.34)|round(1) }} miles</p>
+
+    {# <td><pre>{{ g.user|tojson_pretty|safe }}</pre></td> #}
+
+    <hr>
+    <label for="activity-select">Choose an activity:</label>
+    <form name="activities" method="post" action="{{ url_for('activity.activity_info') }}">
+      <select name="activity-id" id="activity-select">
+        {% for activity in activities %}
+          <option value="{{ activity['id'] }}">{{ activity["desc"] }}</option>"
+        {% endfor %}
+      </select>
+      <button type="submit" class="btn btn-default">Go</button>
+    </form>
+
+  {% else %}
+    <p>Log in to see your data!</p>
+  {% endif %}
+{% endblock %}
