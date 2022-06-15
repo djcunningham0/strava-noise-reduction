@@ -1,5 +1,5 @@
 import os
-from flask import Flask, session, g
+from flask import Flask, session, g, url_for
 from authlib.integrations.flask_client import OAuth
 
 from flask_app.shared import (
@@ -16,6 +16,8 @@ def create_app() -> Flask:
     app.config.update(SECRET_KEY=os.getenv("SECRET_KEY"))
 
     # set up Strava oauth service and attach to app context so it can be used in blueprints
+    root_uri = "https://strava-noise-reduction.herokuapp.com" if os.getenv("FLASK_ENV") == "production" \
+        else "http://127.0.0.1:5000"  # TODO figure out a better way to do this
     with app.app_context():
         app.oauth = OAuth(app)
         app.oauth.register(
@@ -26,10 +28,11 @@ def create_app() -> Flask:
             authorization_endpoint="http://www.strava.com/oauth/authorize",
             token_endpoint="https://www.strava.com/api/v3/oauth/token",
             userinfo_endpoint="athlete",
+            redirect_uri=f"{root_uri}/auth/strava_auth",
             client_kwargs={
-                'response_type': 'code',
-                'scope': 'read,read_all,profile:read_all,activity:read_all',
-                'token_endpoint_auth_method': 'client_secret_post',
+                "response_type": "code",
+                "scope": "read,read_all,profile:read_all,activity:read_all",
+                "token_endpoint_auth_method": "client_secret_post",
             },
         )
 
