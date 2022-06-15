@@ -19,7 +19,6 @@ def get_stats() -> Dict[str, Any]:
 
 
 def get_activities() -> List[Dict[str, str]]:
-    print("entering get_activities...")
     if not g.user:
         return []
     activity_list = call_strava_api("activities")
