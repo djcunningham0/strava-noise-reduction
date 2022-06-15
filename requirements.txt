@@ -5,3 +5,4 @@ filterpy
 authlib
 numpy
 scipy
+plotly
