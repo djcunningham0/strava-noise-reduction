@@ -27,7 +27,10 @@
     </div>
 </form>
 
-<p id='chart' class='chart'></p>
+<div style="margin-bottom: 60px;">
+  {{ plot_div | safe }}
+</div>
+
 <h2>Original Activity</h2>
 <p>distance: {{ meters_to_miles(data["distance"]) | round(2) }} miles</p>
 <p>elevation gain: {{ meters_to_feet(data["total_elevation_gain"]) | round | int }} feet</p>
@@ -42,11 +45,3 @@
 {% endblock %}
 
 {% block content2 %}{% endblock %}
-
-{% block endcontent %}
-<script src='https://cdn.plot.ly/plotly-latest.min.js'></script>
-<script type='text/javascript'>
-  var graphs = {{ plot_json|safe }};
-  Plotly.plot('chart',graphs,{});
-</script>
-{% endblock %}

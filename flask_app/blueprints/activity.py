@@ -1,8 +1,7 @@
 from flask import Blueprint, request, render_template
 import plotly.graph_objects as go
-from plotly.utils import PlotlyJSONEncoder
+import plotly.offline as pyo
 import numpy as np
-import json
 from typing import List, Tuple, Dict, Any
 
 from flask_app.kalman_filter import create_kalman_filter
@@ -49,9 +48,12 @@ def activity_info():
     mu, cov, _, _ = kf.rts_smoother(mu, cov)
     preds = [(x[0], x[2]) for x in mu]  # [(pred_lat_0, pred_long_0), ...)]
 
+    fig = get_activity_plot(streams, preds)
 
-    plot_json = get_activity_plot(streams, preds)
-    return render_template("activity.html", data=activity_data, plot_json=plot_json)
+    # if using `include_plotlyjs=False`, you must load Plotly.js separately (currently loading in `base.html` template)
+    plot_div = pyo.plot(fig, output_type="div", include_plotlyjs=False)
+
+    return render_template("activity.html", data=activity_data, plot_div=plot_div)
 
 
 # @bp.post("/process_activity")
@@ -64,14 +66,13 @@ def activity_info():
 #     # return redirect(url_for(f"{PREFIX}.activity_info"), code=307)
 
 
-def get_activity_plot(streams: dict, preds: List[Tuple[float, float]]) -> str:
+def get_activity_plot(streams: dict, preds: List[Tuple[float, float]]) -> go.Figure:
     lat = [x[0] for x in streams["latlng"]["data"]]
     long = [x[1] for x in streams["latlng"]["data"]]
     z = [meters_to_feet(x) for x in streams["altitude"]["data"]]
     t = [x for x in streams["time"]["data"]]
     fig = plot_tracks_2d(lat, long, preds=preds)
-    fig_json = json.dumps(fig, cls=PlotlyJSONEncoder)
-    return fig_json
+    return fig
 
 
 def get_activity_data(activity_id: str) -> dict:
@@ -82,7 +83,7 @@ def get_activity_streams(activity_id: str) -> Dict[str, Dict[str, Any]]:
     params = {
         "keys": "time,latlng,altitude,velocity_smooth,moving",
         "key_by_type": True,
-        "resolution": "high",  # TODO: is it possible to get full resolution?
+        # "resolution": "high",  # high limits to 10k points; leaving it out gets all points
     }
     streams = call_strava_api(f"activities/{activity_id}/streams", params=params)
     return streams
@@ -99,18 +100,17 @@ def plot_tracks_2d(
     zoom = zoom or get_zoom_center(lat_meas, lon_meas)[0]
     center = center or get_zoom_center(lat_meas, lon_meas)[1]
 
-    fig = go.Figure(go.Scattermapbox(lat=lat_meas, lon=lon_meas, mode="markers+lines", name="Strava"))
+    fig = go.Figure(go.Scattermap(lat=lat_meas, lon=lon_meas, mode="markers+lines", name="Strava"))
     lat_pred = [x[0] for x in preds]
     long_pred = [x[1] for x in preds]
-    fig.add_trace(go.Scattermapbox(lat=lat_pred, lon=long_pred, mode="lines", name="smoothed w/ Kalman filter"))
+    fig.add_trace(go.Scattermap(lat=lat_pred, lon=long_pred, mode="lines", name="smoothed w/ Kalman filter"))
 
     fig.update_layout(
         margin={"r": 0, "t": 0, "l": 0, "b": 0},
-        mapbox={
-            "style": "stamen-terrain",
-            "center": center,
-            "zoom": zoom,
-        }
+        map=dict(
+            center=go.layout.map.Center(lat=center["lat"], lon=center["lon"]),
+            zoom=zoom,
+        ),
     )
     return fig
 
