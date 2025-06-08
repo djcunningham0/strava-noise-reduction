@@ -1,8 +1,9 @@
+authlib
+cachetools
+filterpy
 Flask
 gunicorn
-requests
-filterpy
-authlib
 numpy
-scipy
 plotly
+requests
+scipy

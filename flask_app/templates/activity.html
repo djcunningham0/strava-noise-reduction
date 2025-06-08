@@ -3,9 +3,7 @@
 {% block content %}
 <h2>{{ data["name"] }} ({{ data["start_date_local"][:10] }})</h2>
 
-<form name="activities" method="post" action="{{ url_for('activity.activity_info') }}">
-    {# pass activity-data as hidden input so it's available for submitting in a new request #}
-    <input type="hidden" name="activity-id" id="activity-id" value="{{ data['id'] }}">
+<form name="chart-params" method="get" action="{{ url_for('activity.activity_info', activity_id=data['id']) }}">
     <div class="row">
         <div class="column4">
             <label for="uncertainty-pos">Position uncertainty (ft)</label>

@@ -1,8 +1,10 @@
-from flask import Blueprint, request, render_template
+from typing import List, Tuple, Dict, Any
+
+import numpy as np
 import plotly.graph_objects as go
 import plotly.offline as pyo
-import numpy as np
-from typing import List, Tuple, Dict, Any
+from cachetools import TTLCache, cached
+from flask import Blueprint, request, render_template
 
 from flask_app.kalman_filter import create_kalman_filter
 from flask_app.shared import call_strava_api, meters_to_feet
@@ -12,23 +14,21 @@ from flask_app import config
 PREFIX = "activity"
 bp = Blueprint("activity", __name__, url_prefix=f"/{PREFIX}")
 
+activity_info_cache = TTLCache(maxsize=100, ttl=60 * 60 * 24)  # 24 hours
+stream_cache = TTLCache(maxsize=100, ttl=60 * 60 * 24)  # 24 hours
 
-@bp.post("/activity_info")
-def activity_info():
-    # TODO: this can get pretty intensive because it calls the API each time we hit
-    #  the "recalculate" button. We should hit the API once, cache the data, and then
-    #  pass that cached data into this function
-    activity_id = request.form.get("activity-id")
+
+@bp.get("/activity_info/<string:activity_id>")
+def activity_info(activity_id: str):
     activity_data = get_activity_data(activity_id)
     streams = get_activity_streams(activity_id)
 
     # get the Kalman filter params from the request or use the defaults
     kf_params = {
-        "uncertainty_pos": request.form.get("uncertainty-pos", config.DEFAULT_UNCERTAINTY_POS),
-        "uncertainty_velo": request.form.get("uncertainty-velo", config.DEFAULT_UNCERTAINTY_VELO),
-        "process_uncertainty": request.form.get("process-uncertainty", config.DEFAULT_PROCESS_UNCERTAINTY),
-        "state_uncertainty": request.form.get("state-uncertainty", config.DEFAULT_STATE_UNCERTAINTY),
-        "process_uncertainty_step": config.DEFAULT_PROCESS_UNCERTAINTY_STEP,
+        "uncertainty_pos": request.args.get("uncertainty-pos", config.DEFAULT_UNCERTAINTY_POS),
+        "uncertainty_velo": request.args.get("uncertainty-velo", config.DEFAULT_UNCERTAINTY_VELO),
+        "process_uncertainty": request.args.get("process-uncertainty", config.DEFAULT_PROCESS_UNCERTAINTY),
+        "state_uncertainty": request.args.get("state-uncertainty", config.DEFAULT_STATE_UNCERTAINTY),
     }
 
     # fit the Kalman filter
@@ -52,18 +52,7 @@ def activity_info():
 
     # if using `include_plotlyjs=False`, you must load Plotly.js separately (currently loading in `base.html` template)
     plot_div = pyo.plot(fig, output_type="div", include_plotlyjs=False)
-
     return render_template("activity.html", data=activity_data, plot_div=plot_div)
-
-
-# @bp.post("/process_activity")
-# def process_activity():
-#     activity_id = request.form.get("activity-id")
-#     activity_data = get_activity_data(activity_id)
-#     activity_streams = get_activity_streams(activity_id)
-#     json_data = {"activity-data": activity_data, "activity-streams": activity_streams}
-#     return redirect(url_for(f"{PREFIX}.activity_info", json=json_data), code=307)
-#     # return redirect(url_for(f"{PREFIX}.activity_info"), code=307)
 
 
 def get_activity_plot(streams: dict, preds: List[Tuple[float, float]]) -> go.Figure:
@@ -75,10 +64,12 @@ def get_activity_plot(streams: dict, preds: List[Tuple[float, float]]) -> go.Fig
     return fig
 
 
+@cached(activity_info_cache)
 def get_activity_data(activity_id: str) -> dict:
     return call_strava_api(f"activities/{activity_id}")
 
 
+@cached(stream_cache)
 def get_activity_streams(activity_id: str) -> Dict[str, Dict[str, Any]]:
     params = {
         "keys": "time,latlng,altitude,velocity_smooth,moving",

@@ -1,9 +1,12 @@
 from flask import Blueprint, g, render_template
 from typing import Dict, Any, List
+from cachetools import TTLCache, cached
 
 from flask_app.shared import call_strava_api
 
 bp = Blueprint("home", __name__)
+
+ttl_cache = TTLCache(maxsize=100, ttl=60 * 15)  # 15 minutes
 
 
 @bp.get("/")
@@ -18,6 +21,7 @@ def get_stats() -> Dict[str, Any]:
     return call_strava_api(f"athletes/{athlete_id}/stats")
 
 
+@cached(ttl_cache)
 def get_activities() -> List[Dict[str, str]]:
     if not g.user:
         return []
