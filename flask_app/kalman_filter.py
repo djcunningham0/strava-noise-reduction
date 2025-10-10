@@ -1,6 +1,6 @@
 """
 TODO:
- - design a better Kalman filter (currently using a simple 2nd order filter, but
+ - design a better Kalman filter (currently using a simple first-order filter, but
    need to allow for acceleration/changes of direction)
  - figure out how to convert (lat, long, altitude) to (x, y, z) in the matrix math
    (currently treating lat and long like x and y)
