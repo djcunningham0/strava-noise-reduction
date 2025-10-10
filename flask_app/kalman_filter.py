@@ -14,6 +14,11 @@ import numpy as np
 from typing import List
 
 
+# note: 1 degree latitide ~= 69 miles; 1 degree longitude ~= 53 miles at my latitude
+DEG_LAT_TO_FEET = 1 / 5280 / 69
+DEG_LON_TO_FEET = 1 / 5280 / 53
+
+
 def create_kalman_filter(
         lat: List[float],
         long: List[float],
@@ -23,10 +28,11 @@ def create_kalman_filter(
         q_var: float,
         dt: float = 1.0,
 ) -> KalmanFilter:
-    uncertainty_x = uncertainty_pos / 5280 / 69  # uncertainty latitude -- convert from feet: x / 5280 / 69
-    uncertainty_vx = (uncertainty_velo / 3 / 5280 / 69) ** 2  # max speed = 25 ft/s (running) --> 3*sigma = 25 --> sigma^2 = (25/3 / 5280 / 69)^2
-    uncertainty_y = uncertainty_pos / 5280 / 53  # uncertainty longitude -- convert from feet: x / 5280 / 53
-    uncertainty_vy = (uncertainty_velo / 3 / 5280 / 69)
+    # convert positions and velocities from lat/lon to feet
+    uncertainty_x = uncertainty_pos * DEG_LAT_TO_FEET
+    uncertainty_vx = (uncertainty_velo / 3 * DEG_LAT_TO_FEET) ** 2  # max speed = 25 ft/s (running) --> 3*sigma = 25 --> sigma^2 = (25/3 / 5280 / 69)^2
+    uncertainty_y = uncertainty_pos * DEG_LON_TO_FEET
+    uncertainty_vy = (uncertainty_velo / 3 * DEG_LON_TO_FEET) ** 2
 
     kf = KalmanFilter(dim_x=4, dim_z=2)
     kf.x = np.array([lat[0], lat[1] - lat[0], long[1], long[1] - long[0]]).T  # initial state (location and velocity)
@@ -37,8 +43,8 @@ def create_kalman_filter(
     kf.H = np.array([[1., 0., 0., 0.],
                      [0., 0., 1., 0.]])  # Measurement function
     kf.P = np.diag([uncertainty_x, uncertainty_vx, uncertainty_y, uncertainty_vy])  # covariance matrix
-    kf.R = np.array([[state_uncertainty_pos / 5280 / 69, 0.],
-                     [0., state_uncertainty_pos / 5280 / 53]])  # state uncertainty -- again convert from feet to latitude
+    kf.R = np.array([[state_uncertainty_pos * DEG_LAT_TO_FEET, 0.],
+                     [0., state_uncertainty_pos * DEG_LON_TO_FEET]])  # state uncertainty -- again convert from feet to latitude
     q = Q_discrete_white_noise(dim=2, dt=dt, var=q_var)
     kf.Q = block_diag(q, q)  # process uncertainty -- should probably be close to zero
     return kf
