@@ -34,11 +34,15 @@ def create_app() -> Flask:
         )
 
     # register blueprints
-    from flask_app.blueprints import home, auth, activity, dev
+    from flask_app.blueprints import home, auth, activity
     app.register_blueprint(home.bp)
     app.register_blueprint(auth.bp)
     app.register_blueprint(activity.bp)
-    app.register_blueprint(dev.bp)
+
+    # only register dev blueprint in development mode
+    if os.getenv("FLASK_ENV") == "development":
+        from flask_app.blueprints import dev
+        app.register_blueprint(dev.bp)
     app.add_url_rule("/", endpoint="homepage")
 
     # use functions in jinja2 templates

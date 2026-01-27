@@ -1,45 +1,197 @@
 {% extends 'base.html' %}
 
+{% block title %}{{ data["name"] }}{% endblock %}
+
 {% block content %}
-<h2>{{ data["name"] }} ({{ data["start_date_local"][:10] }})</h2>
-
-<form name="chart-params" method="get" action="{{ url_for('activity.activity_info', activity_id=data['id']) }}">
-    <div class="row">
-        <div class="column4">
-            <label for="uncertainty-pos">Position uncertainty (ft)</label>
-            <input type="number" id="uncertainty-pos" name="uncertainty-pos" min="1" value="10">
-        </div>
-        <div class="column4">
-            <label for="uncertainty-velo">Velocity uncertainty (ft/s)</label>
-            <input type="number" id="uncertainty-velo" name="uncertainty-velo" min="1" value="20">
-        </div>
-        <div class="column4">
-            <label for="process-uncertainty">Process uncertainty</label>
-            <input type="number" id="process-uncertainty" name="process-uncertainty" value="1e-9" step="1e-9">
-        </div>
-        <div class="column4">
-            <label for="state-uncertainty">State uncertainty</label>
-            <input type="number" id="state-uncertainty" name="state-uncertainty" value="10">
-        </div>
-        <button type="submit" class="btn btn-default">Recalculate</button>
-    </div>
-</form>
-
-<div style="margin-bottom: 60px;">
-  {{ plot_div | safe }}
+<div class="mb-6">
+  <a href="{{ url_for('homepage') }}" class="text-orange-600 hover:text-orange-800 text-sm">
+    &larr; Back to activities
+  </a>
 </div>
 
-<h2>Original Activity</h2>
-<p>distance: {{ meters_to_miles(data["distance"]) | round(2) }} miles</p>
-<p>elevation gain: {{ meters_to_feet(data["total_elevation_gain"]) | round | int }} feet</p>
-<p>moving time: {{ seconds_to_time(data["moving_time"]) }}</p>
-<p>elapsed time: {{ seconds_to_time(data["elapsed_time"]) }}</p>
-<p>moving pace: {{ seconds_to_time(data["moving_time"] / meters_to_miles(data["distance"])) }}</p>
-<p>elapsed pace: {{ seconds_to_time(data["elapsed_time"] / meters_to_miles(data["distance"])) }}</p>
-<p>average speed: {{ meters_per_second_to_mph(data["average_speed"]) | round(1) }} mph</p>
-<p>max speed: {{ meters_per_second_to_mph(data["max_speed"]) | round(1) }} mph</p>
+<div class="bg-white rounded-lg shadow-md p-6 mb-6">
+  <h1 class="text-2xl font-bold text-gray-800 mb-2">{{ data["name"] }}</h1>
+  <p class="text-gray-500">{{ data["start_date_local"][:10] }} | {{ data["type"] }}</p>
+</div>
 
-{# <td><pre>{{ pretty_print_json(data) }}</pre></td> #} {# include this to print out all the activity data #}
+<div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+  <!-- Parameter Controls -->
+  <div class="lg:col-span-1">
+    <div class="bg-white rounded-lg shadow-md p-6 sticky top-6">
+      <h2 class="text-lg font-semibold text-gray-800 mb-4">Kalman Filter Parameters</h2>
+      <p class="text-xs text-gray-500 mb-4">Adjust parameters to change smoothing behavior. Map updates automatically.</p>
+
+      <form id="param-form" class="space-y-6">
+        <div>
+          <label for="uncertainty_pos" class="block text-sm font-medium text-gray-700 mb-1">
+            Position Uncertainty (ft)
+          </label>
+          <input
+            type="range"
+            id="uncertainty_pos"
+            name="uncertainty_pos"
+            min="1"
+            max="50"
+            step="1"
+            value="{{ kf_params.uncertainty_pos | int }}"
+            class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
+            hx-get="{{ url_for('activity.activity_map', activity_id=data['id']) }}"
+            hx-trigger="input changed delay:300ms"
+            hx-target="#map-wrapper"
+            hx-include="#param-form"
+            hx-indicator="#loading-indicator"
+          >
+          <span class="text-sm text-gray-500" id="uncertainty_pos_val">{{ kf_params.uncertainty_pos | int }}</span>
+        </div>
+
+        <div>
+          <label for="uncertainty_velo" class="block text-sm font-medium text-gray-700 mb-1">
+            Velocity Uncertainty (ft/s)
+          </label>
+          <input
+            type="range"
+            id="uncertainty_velo"
+            name="uncertainty_velo"
+            min="1"
+            max="100"
+            step="1"
+            value="{{ kf_params.uncertainty_velo | int }}"
+            class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
+            hx-get="{{ url_for('activity.activity_map', activity_id=data['id']) }}"
+            hx-trigger="input changed delay:300ms"
+            hx-target="#map-wrapper"
+            hx-include="#param-form"
+            hx-indicator="#loading-indicator"
+          >
+          <span class="text-sm text-gray-500" id="uncertainty_velo_val">{{ kf_params.uncertainty_velo | int }}</span>
+        </div>
+
+        <div>
+          <label for="process_uncertainty" class="block text-sm font-medium text-gray-700 mb-1">
+            Process Uncertainty
+          </label>
+          <select
+            id="process_uncertainty"
+            name="process_uncertainty"
+            class="w-full p-2 border border-gray-300 rounded-md text-sm"
+            hx-get="{{ url_for('activity.activity_map', activity_id=data['id']) }}"
+            hx-trigger="change"
+            hx-target="#map-wrapper"
+            hx-include="#param-form"
+            hx-indicator="#loading-indicator"
+          >
+            <option value="1e-12" {% if kf_params.process_uncertainty == 1e-12 %}selected{% endif %}>1e-12 (Very smooth)</option>
+            <option value="1e-11" {% if kf_params.process_uncertainty == 1e-11 %}selected{% endif %}>1e-11</option>
+            <option value="1e-10" {% if kf_params.process_uncertainty == 1e-10 %}selected{% endif %}>1e-10</option>
+            <option value="1e-9" {% if kf_params.process_uncertainty == 1e-9 %}selected{% endif %}>1e-9 (Default)</option>
+            <option value="1e-8" {% if kf_params.process_uncertainty == 1e-8 %}selected{% endif %}>1e-8</option>
+            <option value="1e-7" {% if kf_params.process_uncertainty == 1e-7 %}selected{% endif %}>1e-7</option>
+            <option value="1e-6" {% if kf_params.process_uncertainty == 1e-6 %}selected{% endif %}>1e-6 (Less smooth)</option>
+          </select>
+        </div>
+
+        <div>
+          <label for="state_uncertainty" class="block text-sm font-medium text-gray-700 mb-1">
+            State Uncertainty
+          </label>
+          <input
+            type="range"
+            id="state_uncertainty"
+            name="state_uncertainty"
+            min="1"
+            max="50"
+            step="1"
+            value="{{ kf_params.state_uncertainty | int }}"
+            class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
+            hx-get="{{ url_for('activity.activity_map', activity_id=data['id']) }}"
+            hx-trigger="input changed delay:300ms"
+            hx-target="#map-wrapper"
+            hx-include="#param-form"
+            hx-indicator="#loading-indicator"
+          >
+          <span class="text-sm text-gray-500" id="state_uncertainty_val">{{ kf_params.state_uncertainty | int }}</span>
+        </div>
+      </form>
+
+      <div id="loading-indicator" class="htmx-indicator mt-4 text-center">
+        <svg class="animate-spin h-5 w-5 mx-auto text-orange-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+        </svg>
+        <span class="text-sm text-gray-500 mt-1">Updating map...</span>
+      </div>
+
+      <div class="mt-6 pt-4 border-t border-gray-200">
+        <a
+          href="{{ url_for('activity.export_gpx', activity_id=data['id']) }}?uncertainty_pos={{ kf_params.uncertainty_pos }}&uncertainty_velo={{ kf_params.uncertainty_velo }}&process_uncertainty={{ kf_params.process_uncertainty }}&state_uncertainty={{ kf_params.state_uncertainty }}"
+          class="block w-full text-center bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-4 rounded-md transition-colors"
+        >
+          Download GPX
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Map and Stats -->
+  <div class="lg:col-span-3">
+    <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+      <div id="map-wrapper" style="height: 500px;">
+        {% include 'partials/map.html' %}
+      </div>
+    </div>
+
+    <div class="bg-white rounded-lg shadow-md p-6">
+      <h2 class="text-lg font-semibold text-gray-800 mb-4">Activity Stats</h2>
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div class="text-center p-4 bg-gray-50 rounded-lg">
+          <p class="text-2xl font-bold text-gray-800">{{ meters_to_miles(data["distance"]) | round(2) }}</p>
+          <p class="text-sm text-gray-500">Miles</p>
+        </div>
+        <div class="text-center p-4 bg-gray-50 rounded-lg">
+          <p class="text-2xl font-bold text-gray-800">{{ meters_to_feet(data["total_elevation_gain"]) | round | int }}</p>
+          <p class="text-sm text-gray-500">Elevation (ft)</p>
+        </div>
+        <div class="text-center p-4 bg-gray-50 rounded-lg">
+          <p class="text-2xl font-bold text-gray-800">{{ seconds_to_time(data["moving_time"]) }}</p>
+          <p class="text-sm text-gray-500">Moving Time</p>
+        </div>
+        <div class="text-center p-4 bg-gray-50 rounded-lg">
+          <p class="text-2xl font-bold text-gray-800">{{ seconds_to_time(data["moving_time"] / meters_to_miles(data["distance"])) }}</p>
+          <p class="text-sm text-gray-500">Pace (min/mi)</p>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4">
+        <div class="text-center p-4 bg-gray-50 rounded-lg">
+          <p class="text-2xl font-bold text-gray-800">{{ seconds_to_time(data["elapsed_time"]) }}</p>
+          <p class="text-sm text-gray-500">Elapsed Time</p>
+        </div>
+        <div class="text-center p-4 bg-gray-50 rounded-lg">
+          <p class="text-2xl font-bold text-gray-800">{{ meters_per_second_to_mph(data["average_speed"]) | round(1) }}</p>
+          <p class="text-sm text-gray-500">Avg Speed (mph)</p>
+        </div>
+        <div class="text-center p-4 bg-gray-50 rounded-lg">
+          <p class="text-2xl font-bold text-gray-800">{{ meters_per_second_to_mph(data["max_speed"]) | round(1) }}</p>
+          <p class="text-sm text-gray-500">Max Speed (mph)</p>
+        </div>
+        <div class="text-center p-4 bg-gray-50 rounded-lg">
+          <p class="text-2xl font-bold text-gray-800">{{ seconds_to_time(data["elapsed_time"] / meters_to_miles(data["distance"])) }}</p>
+          <p class="text-sm text-gray-500">Elapsed Pace</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Update displayed values when sliders change
+  document.querySelectorAll('input[type="range"]').forEach(slider => {
+    const valSpan = document.getElementById(slider.id + '_val');
+    if (valSpan) {
+      slider.addEventListener('input', () => {
+        valSpan.textContent = slider.value;
+      });
+    }
+  });
+</script>
 {% endblock %}
-
-{% block content2 %}{% endblock %}

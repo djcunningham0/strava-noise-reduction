@@ -2,8 +2,10 @@ authlib
 cachetools
 filterpy
 Flask
+gpxpy
 gunicorn
 numpy
 plotly
+python-dotenv
 requests
 scipy

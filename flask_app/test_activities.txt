@@ -1,0 +1,7 @@
+# Test activity IDs for development
+# These were previously hardcoded in home.py for testing purposes
+
+2657270147  # downtown run 1
+2657487857  # downtown run 2
+12082203751 # Sawtooth Hike
+4230771554  # Zion hike

@@ -1,39 +1,176 @@
 {% extends 'base.html' %}
 
+{% block title %}Home{% endblock %}
+
 {% block content %}
   {% if g.user %}
-    <h1>Hello {{ g.user.get("firstname") or g.user.get("username") or "" }}!</h1>
-    <img src="{{ g.user.profile }}" alt="user_image">
-    <h2>Stats</h2>
-    <p>Run: {{ g.user.get("stats", {}).get("all_run_totals", {}).get("count", 0) }} total --
-      {{ (g.user.get("stats", {}).get("all_run_totals", {}).get("distance", 0) / 1609.34)|round(1) }} miles</p>
-    <p>Bike: {{ g.user.get("stats", {}).get("all_ride_totals", {}).get("count", 0) }} total --
-      {{ (g.user.get("stats", {}).get("all_ride_totals", {}).get("distance", 0) / 1609.34)|round(1) }} miles</p>
-    <p>Swim: {{ g.user.get("stats", {}).get("all_swim_totals", {}).get("count", 0) }} total --
-      {{ (g.user.get("stats", {}).get("all_swim_totals", {}).get("distance", 0) / 1609.34)|round(1) }} miles</p>
+    <!-- User Header -->
+    <div class="bg-white rounded-lg shadow-md p-6 mb-8">
+      <div class="flex items-center space-x-6">
+        <img src="{{ g.user.profile }}" alt="Profile" class="w-20 h-20 rounded-full">
+        <div>
+          <h1 class="text-2xl font-bold text-gray-800">
+            Hello, {{ g.user.get("firstname") or g.user.get("username") or "Athlete" }}!
+          </h1>
+          <p class="text-gray-500">Select an activity below to view and smooth the GPS track</p>
+        </div>
+      </div>
 
-    {# <td><pre>{{ g.user|tojson_pretty|safe }}</pre></td> #}
+      <!-- Stats Summary -->
+      <div class="grid grid-cols-3 gap-4 mt-6 pt-6 border-t border-gray-100">
+        <div class="text-center">
+          <p class="text-2xl font-bold text-orange-600">{{ g.user.get("stats", {}).get("all_run_totals", {}).get("count", 0) }}</p>
+          <p class="text-sm text-gray-500">Runs</p>
+          <p class="text-xs text-gray-400">{{ (g.user.get("stats", {}).get("all_run_totals", {}).get("distance", 0) / 1609.34)|round(0)|int }} mi</p>
+        </div>
+        <div class="text-center">
+          <p class="text-2xl font-bold text-orange-600">{{ g.user.get("stats", {}).get("all_ride_totals", {}).get("count", 0) }}</p>
+          <p class="text-sm text-gray-500">Rides</p>
+          <p class="text-xs text-gray-400">{{ (g.user.get("stats", {}).get("all_ride_totals", {}).get("distance", 0) / 1609.34)|round(0)|int }} mi</p>
+        </div>
+        <div class="text-center">
+          <p class="text-2xl font-bold text-orange-600">{{ g.user.get("stats", {}).get("all_swim_totals", {}).get("count", 0) }}</p>
+          <p class="text-sm text-gray-500">Swims</p>
+          <p class="text-xs text-gray-400">{{ (g.user.get("stats", {}).get("all_swim_totals", {}).get("distance", 0) / 1609.34)|round(1) }} mi</p>
+        </div>
+      </div>
+    </div>
 
-    <hr>
-    <label for="activity-select">Choose an activity:</label>
-    <form id="activity-form">
-      <select name="activity-id" id="activity-select">
-        {% for activity in activities %}
-          <option value="{{ activity['id'] }}">{{ activity["desc"] }}</option>
-        {% endfor %}
-      </select>
-      <button type="submit" class="btn btn-default">Go</button>
-    </form>
+    <!-- Activity Type Filter -->
+    <div class="mb-6">
+      <div class="flex flex-wrap gap-2" id="type-filters">
+        <button class="filter-btn active px-4 py-2 rounded-full text-sm font-medium bg-orange-600 text-white" data-type="all">
+          All
+        </button>
+        <button class="filter-btn px-4 py-2 rounded-full text-sm font-medium bg-gray-200 text-gray-700 hover:bg-gray-300" data-type="Run">
+          Runs
+        </button>
+        <button class="filter-btn px-4 py-2 rounded-full text-sm font-medium bg-gray-200 text-gray-700 hover:bg-gray-300" data-type="Ride">
+          Rides
+        </button>
+        <button class="filter-btn px-4 py-2 rounded-full text-sm font-medium bg-gray-200 text-gray-700 hover:bg-gray-300" data-type="Hike">
+          Hikes
+        </button>
+        <button class="filter-btn px-4 py-2 rounded-full text-sm font-medium bg-gray-200 text-gray-700 hover:bg-gray-300" data-type="Walk">
+          Walks
+        </button>
+      </div>
+    </div>
+
+    <!-- Activities Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" id="activities-grid">
+      {% for activity in activities %}
+        <a
+          href="{{ url_for('activity.activity_info', activity_id=activity['id']) }}"
+          class="activity-card bg-white rounded-lg shadow-md p-5 hover:shadow-lg transition-shadow border border-transparent hover:border-orange-200"
+          data-type="{{ activity['type'] }}"
+        >
+          <div class="flex items-start justify-between mb-3">
+            <div class="flex items-center space-x-3">
+              <!-- Activity Type Icon -->
+              <div class="w-10 h-10 rounded-full bg-orange-100 flex items-center justify-center">
+                {% if activity['type'] == 'Run' %}
+                  <svg class="w-5 h-5 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                  </svg>
+                {% elif activity['type'] == 'Ride' %}
+                  <svg class="w-5 h-5 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <circle cx="5" cy="18" r="3" stroke-width="2"/>
+                    <circle cx="19" cy="18" r="3" stroke-width="2"/>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18V9l-3 3M12 9l7 9"/>
+                  </svg>
+                {% elif activity['type'] in ['Hike', 'Walk'] %}
+                  <svg class="w-5 h-5 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2M9 7a4 4 0 100 8 4 4 0 000-8z"/>
+                  </svg>
+                {% else %}
+                  <svg class="w-5 h-5 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+                  </svg>
+                {% endif %}
+              </div>
+              <div>
+                <h3 class="font-semibold text-gray-800 line-clamp-1">{{ activity['name'] }}</h3>
+                <p class="text-sm text-gray-500">{{ activity['date'] }}</p>
+              </div>
+            </div>
+            <span class="text-xs font-medium text-orange-600 bg-orange-50 px-2 py-1 rounded">{{ activity['type'] }}</span>
+          </div>
+
+          <div class="grid grid-cols-3 gap-2 text-center">
+            <div class="bg-gray-50 rounded p-2">
+              <p class="text-lg font-bold text-gray-800">{{ (activity['distance'] / 1609.34)|round(1) }}</p>
+              <p class="text-xs text-gray-500">miles</p>
+            </div>
+            <div class="bg-gray-50 rounded p-2">
+              <p class="text-lg font-bold text-gray-800">{{ (activity['moving_time'] // 60)|int }}</p>
+              <p class="text-xs text-gray-500">mins</p>
+            </div>
+            <div class="bg-gray-50 rounded p-2">
+              <p class="text-lg font-bold text-gray-800">{{ (activity['total_elevation_gain'] * 3.28084)|round(0)|int }}</p>
+              <p class="text-xs text-gray-500">ft gain</p>
+            </div>
+          </div>
+        </a>
+      {% endfor %}
+    </div>
+
+    {% if not activities %}
+      <div class="text-center py-12 bg-white rounded-lg shadow-md">
+        <svg class="w-16 h-16 mx-auto text-gray-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"/>
+        </svg>
+        <p class="text-gray-500">No activities found. Go record some GPS tracks on Strava!</p>
+      </div>
+    {% endif %}
 
     <script>
-      document.getElementById("activity-form").addEventListener("submit", function(event) {
-        event.preventDefault();
-        const activityId = document.getElementById("activity-select").value;
-        window.location.href = "{{ url_for('activity.activity_info', activity_id='') }}" + activityId;
+      // Activity type filtering
+      document.querySelectorAll('.filter-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          // Update button styles
+          document.querySelectorAll('.filter-btn').forEach(b => {
+            b.classList.remove('active', 'bg-orange-600', 'text-white');
+            b.classList.add('bg-gray-200', 'text-gray-700');
+          });
+          btn.classList.add('active', 'bg-orange-600', 'text-white');
+          btn.classList.remove('bg-gray-200', 'text-gray-700');
+
+          // Filter activities
+          const type = btn.dataset.type;
+          document.querySelectorAll('.activity-card').forEach(card => {
+            if (type === 'all' || card.dataset.type === type) {
+              card.style.display = '';
+            } else {
+              card.style.display = 'none';
+            }
+          });
+        });
       });
     </script>
 
   {% else %}
-    <p>Log in to see your data!</p>
+    <!-- Landing page for non-logged-in users -->
+    <div class="text-center py-16">
+      <div class="max-w-2xl mx-auto">
+        <svg class="w-24 h-24 mx-auto text-orange-600 mb-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"/>
+        </svg>
+        <h1 class="text-3xl font-bold text-gray-800 mb-4">Smooth Your GPS Tracks</h1>
+        <p class="text-lg text-gray-600 mb-8">
+          Use Kalman filtering to remove noise from your Strava GPS data.
+          Get cleaner tracks and more accurate route visualizations.
+        </p>
+        <a
+          href="{{ url_for('auth.login') }}"
+          class="inline-flex items-center px-6 py-3 bg-orange-600 hover:bg-orange-700 text-white font-medium rounded-lg transition-colors"
+        >
+          <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M15.387 17.944l-2.089-4.116h-3.065L15.387 24l5.15-10.172h-3.066m-7.008-5.599l2.836 5.598h4.172L10.463 0l-7 13.828h4.169"/>
+          </svg>
+          Connect with Strava
+        </a>
+      </div>
+    </div>
   {% endif %}
 {% endblock %}

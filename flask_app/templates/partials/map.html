@@ -1,0 +1,14 @@
+<div id="map-container" class="relative">
+  {{ plot_div | safe }}
+
+  <div class="mt-4 flex items-center justify-center space-x-8 text-sm text-gray-600">
+    <div class="flex items-center">
+      <span class="inline-block w-4 h-1 bg-blue-500 mr-2"></span>
+      <span>Original GPS Track</span>
+    </div>
+    <div class="flex items-center">
+      <span class="inline-block w-4 h-1 bg-orange-500 mr-2"></span>
+      <span>Kalman Smoothed</span>
+    </div>
+  </div>
+</div>

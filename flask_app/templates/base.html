@@ -1,30 +1,54 @@
 <!doctype html>
-<html>
+<html lang="en">
 <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>{% block title %}{% endblock %} - Strava Noise Reduction</title>
-  <link href='http://fonts.googleapis.com/css?family=Lato:300,400,700' rel='stylesheet' type='text/css'>
-  <link href='http://fonts.googleapis.com/css?family=Open+Sans:300,400,700' rel='stylesheet' type='text/css'>
-  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/htmx.org@2.0.4"></script>
   <script src="https://cdn.plot.ly/plotly-3.0.1.min.js"></script>
+  <style>
+    /* HTMX loading indicator */
+    .htmx-request .htmx-indicator {
+      display: inline-block;
+    }
+    .htmx-indicator {
+      display: none;
+    }
+  </style>
 </head>
-<body>
-  <nav>
-    <h1><a href="{{ url_for('homepage') }}">Strava Noise Reduction</a></h1>
-    <ul>
-      {% if g.user %}
-        <li><span>{{ g.user['name'] }}</span>
-        <li><a href="{{ url_for('auth.logout') }}">Log Out</a>
-      {% else %}
-        <li><a href="{{ url_for('auth.login') }}">Log In</a>
-      {% endif %}
-    </ul>
+<body class="bg-gray-50 min-h-screen">
+  <nav class="bg-orange-600 text-white shadow-lg">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex justify-between h-16 items-center">
+        <a href="{{ url_for('homepage') }}" class="text-xl font-bold hover:text-orange-200 transition-colors">
+          Strava Noise Reduction
+        </a>
+        <div class="flex items-center space-x-4">
+          {% if g.user %}
+            <span class="text-orange-100">{{ g.user['name'] }}</span>
+            <a href="{{ url_for('auth.logout') }}" class="bg-orange-700 hover:bg-orange-800 px-3 py-2 rounded-md text-sm font-medium transition-colors">
+              Log Out
+            </a>
+          {% else %}
+            <a href="{{ url_for('auth.login') }}" class="bg-orange-700 hover:bg-orange-800 px-3 py-2 rounded-md text-sm font-medium transition-colors">
+              Log In
+            </a>
+          {% endif %}
+        </div>
+      </div>
+    </div>
   </nav>
-  <section class="content">
+
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
     {% for message in get_flashed_messages() %}
-      <div class="flash">{{ message }}</div>
+      <div class="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 mb-4 rounded">
+        {{ message }}
+      </div>
     {% endfor %}
     {% block content %}{% endblock %}
-  </section>
+  </main>
+
   {% block endcontent %}{% endblock %}
 </body>
 </html>
