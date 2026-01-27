@@ -1,4 +1,5 @@
 from datetime import datetime
+from math import radians, sin, cos, sqrt, atan2
 from typing import List, Tuple, Dict, Any
 
 import numpy as np
@@ -11,6 +12,30 @@ from flask_app.kalman_filter import create_kalman_filter
 from flask_app.shared import call_strava_api, meters_to_feet
 from flask_app.gpx_export import create_gpx, gpx_to_string
 from flask_app import config
+
+
+def haversine_distance(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
+    """Calculate distance between two GPS points in meters using Haversine formula."""
+    R = 6371000  # Earth's radius in meters
+
+    lat1, lon1, lat2, lon2 = map(radians, [lat1, lon1, lat2, lon2])
+    dlat = lat2 - lat1
+    dlon = lon2 - lon1
+
+    a = sin(dlat / 2) ** 2 + cos(lat1) * cos(lat2) * sin(dlon / 2) ** 2
+    c = 2 * atan2(sqrt(a), sqrt(1 - a))
+
+    return R * c
+
+
+def calculate_track_distance(coordinates: List[Tuple[float, float]]) -> float:
+    """Calculate total distance of a track in meters."""
+    total = 0.0
+    for i in range(1, len(coordinates)):
+        lat1, lon1 = coordinates[i - 1]
+        lat2, lon2 = coordinates[i]
+        total += haversine_distance(lat1, lon1, lat2, lon2)
+    return total
 
 
 PREFIX = "activity"
@@ -62,23 +87,36 @@ def activity_info(activity_id: str):
     preds = run_kalman_filter(streams, kf_params)
     plot_div = generate_plot_div(streams, preds)
 
+    # Calculate smoothed distance
+    smoothed_distance = calculate_track_distance(preds)
+
     return render_template(
         "activity.html",
         data=activity_data,
         plot_div=plot_div,
         kf_params=kf_params,
+        smoothed_distance=smoothed_distance,
     )
 
 
 @bp.get("/map/<string:activity_id>")
 def activity_map(activity_id: str):
     """Return just the map partial for HTMX updates."""
+    activity_data = get_activity_data(activity_id)
     streams = get_activity_streams(activity_id)
     kf_params = get_kf_params_from_request()
     preds = run_kalman_filter(streams, kf_params)
     plot_div = generate_plot_div(streams, preds)
 
-    return render_template("partials/map.html", plot_div=plot_div)
+    # Calculate smoothed distance
+    smoothed_distance = calculate_track_distance(preds)
+
+    return render_template(
+        "partials/map.html",
+        plot_div=plot_div,
+        smoothed_distance=smoothed_distance,
+        original_distance=activity_data["distance"],
+    )
 
 
 @bp.get("/export/<string:activity_id>")

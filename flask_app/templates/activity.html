@@ -136,6 +136,7 @@
   <div class="lg:col-span-3">
     <div class="bg-white rounded-lg shadow-md p-6 mb-6">
       <div id="map-wrapper" style="height: 500px;">
+        {% set original_distance = data["distance"] %}
         {% include 'partials/map.html' %}
       </div>
     </div>
