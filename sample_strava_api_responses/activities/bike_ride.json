@@ -1,0 +1,114 @@
+{
+  "resource_state": 3,
+  "athlete": {
+    "id": 43443271,
+    "resource_state": 1
+  },
+  "name": "Afternoon Ride",
+  "distance": 5212.9,
+  "moving_time": 1065,
+  "elapsed_time": 1486,
+  "total_elevation_gain": 6.5,
+  "type": "Ride",
+  "sport_type": "Ride",
+  "workout_type": null,
+  "device_name": "Strava App",
+  "id": 17144760732,
+  "start_date": "2026-01-22T23:38:29Z",
+  "start_date_local": "2026-01-22T17:38:29Z",
+  "timezone": "(GMT-06:00) America/Chicago",
+  "utc_offset": -21600.0,
+  "location_city": null,
+  "location_state": null,
+  "location_country": null,
+  "achievement_count": 0,
+  "kudos_count": 0,
+  "comment_count": 0,
+  "athlete_count": 1,
+  "photo_count": 0,
+  "map": {
+    "id": "a17144760732",
+    "polyline": "khs~Fx~{uO?WXHBOu@n@ELUD?CCv@@JBF\\BAFa@JCFSHOO]JYGMGEFK?OA]@c@CMFSDiACk@UKIICKBAJQRa@J[BKLE@GT[b@MHYd@MHINa@b@W^?JHFAFKFYDIDMVi@FKCY?YCYD{@?UCK@IFQ?i@A[D]Em@NINIQ]OATFPCLBNBn@Ad@Hf@?^C`@AbABPEhCBp@IhAIRi@v@IFGT_@h@e@bAAN_BR`@@BHEBC^Qb@IJIXwAdCW|@?`@CGC@EEMHc@l@MZ[f@SVE@Q`@_@n@GPWZIf@mCnEk@z@MZIZQZKDmArBSNATIJYj@GZOXCJIHMZKJERMXUVQb@QLCLSL_@j@Yn@IBBPE^I@IF_@l@ODAJEHiBrC[l@[f@]n@SRCPOVg@vAOFQh@URq@pAmBbDGVMJ}@pA[p@cAfBcDdGMPC@AAEBSh@QZUh@MTSNMZIJELi@~@Ud@QTg@hAq@bAUh@GFGXWf@QPa@t@KF[p@W^KXIFQf@YZq@zAGFk@`AAJSRIDCHGBCJKPOP?HIJCNC?Af@F|AA|@Ff@CbA@LANDf@?p@B^?tBEVB\\EdCFjA?~@CL?NFVC\\DdACLDTAXEb@F`ABJ?b@Bz@ClADvAA\\@dAEt@Dh@DJ@LEf@DhCC\\Bj@EZBLEnBDBX?P\\H@LETDj@GJBj@AHBBJGl@?~ABVBLAj@Bv@?hABFRADEDDFNIn@DEGQDO?l@DB?ESQ@EHA@CDBEE@PKCA@D@EB|@M_@BQDF@@DGCE@FACEBECF?GHODA@HOHCI@AAB@B",
+    "resource_state": 3,
+    "summary_polyline": "khs~Fx~{uO?WXHBOu@n@ELUD?CCv@@JBF\\BAFa@JCFSHOO]JYGMGEFK?OA]@c@CMFSDiACk@UKIICKBAJQRa@J[BKLE@GT[b@MHYd@MHINa@b@W^?JHFAFKFYDIDMVi@FKCY?YCYD{@?UCK@IFQ?i@A[D]Em@NINIQ]OATFPCLBNBn@Ad@Hf@?^C`@AbABPEhCBp@IhAIRi@v@IFGT_@h@e@bAAN_BR`@@BHEBC^Qb@IJIXwAdCW|@?`@CGC@EEMHc@l@MZ[f@SVE@Q`@_@n@GPWZIf@mCnEk@z@MZIZQZKDmArBSNATIJYj@GZOXCJIHMZKJERMXUVQb@QLCLSL_@j@Yn@IBBPE^I@IF_@l@ODAJEHiBrC[l@[f@]n@SRCPOVg@vAOFQh@URq@pAmBbDGVMJ}@pA[p@cAfBcDdGMPC@AAEBSh@QZUh@MTSNMZIJELi@~@Ud@QTg@hAq@bAUh@GFGXWf@QPa@t@KF[p@W^KXIFQf@YZq@zAGFk@`AAJSRIDCHGBCJKPOP?HIJCNC?Af@F|AA|@Ff@CbA@LANDf@?p@B^?tBEVB\\EdCFjA?~@CL?NFVC\\DdACLDTAXEb@F`ABJ?b@Bz@ClADvAA\\@dAEt@Dh@DJ@LEf@DhCC\\Bj@EZBLEnBDBX?P\\H@LETDj@GJBj@AHBBJGl@@bA"
+  },
+  "trainer": false,
+  "commute": false,
+  "manual": false,
+  "private": false,
+  "visibility": "everyone",
+  "flagged": false,
+  "gear_id": "b11605798",
+  "start_latlng": [
+    41.8831,
+    -87.639002
+  ],
+  "end_latlng": [
+    41.902054,
+    -87.679353
+  ],
+  "average_speed": 4.895,
+  "max_speed": 12.95,
+  "average_watts": 81.4,
+  "device_watts": false,
+  "kilojoules": 86.7,
+  "has_heartrate": false,
+  "heartrate_opt_out": false,
+  "display_hide_heartrate_option": false,
+  "elev_high": 184.2,
+  "elev_low": 179.6,
+  "upload_id": 18239792160,
+  "upload_id_str": "18239792160",
+  "external_id": "9645334F-9864-49F7-88E9-F9FC5F644EF3-activity.fit",
+  "from_accepted_tag": false,
+  "pr_count": 0,
+  "total_photo_count": 0,
+  "has_kudoed": false,
+  "description": "",
+  "calories": 97.0,
+  "perceived_exertion": null,
+  "prefer_perceived_exertion": null,
+  "segment_efforts": "=== LIST OMITTED ===",
+  "splits_metric": "=== LIST OMITTED ===",
+  "splits_standard": "=== LIST OMITTED ===",
+  "laps": "=== LIST OMITTED ===",
+  "gear": {
+    "id": "b11605798",
+    "primary": false,
+    "name": "State Bicycle single speed",
+    "nickname": "State Bicycle single speed",
+    "resource_state": 2,
+    "retired": false,
+    "distance": 6089900,
+    "converted_distance": 3784.1
+  },
+  "photos": {
+    "primary": null,
+    "count": 0
+  },
+  "stats_visibility": [
+    {
+      "type": "heart_rate",
+      "visibility": "everyone"
+    },
+    {
+      "type": "pace",
+      "visibility": "everyone"
+    },
+    {
+      "type": "power",
+      "visibility": "everyone"
+    },
+    {
+      "type": "speed",
+      "visibility": "everyone"
+    },
+    {
+      "type": "calories",
+      "visibility": "everyone"
+    }
+  ],
+  "hide_from_home": true,
+  "embed_token": "75c8816acefcc2ad201f89e26741d03533918577",
+  "available_zones": []
+}

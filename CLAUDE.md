@@ -65,6 +65,27 @@ Using `cachetools.TTLCache`:
 
 `shared.py` automatically refreshes expired Strava tokens before API calls.
 
+### Strava API Notes
+
+**Documentation**: [Strava API Reference](https://developers.strava.com/docs/reference/)
+
+**Key Activity Fields** (from `/athlete/activities`):
+- `type`: General activity type (e.g., "Run", "Ride", "VirtualRide", "VirtualRun", "Hike", "Walk")
+- `sport_type`: More specific subtype (e.g., "MountainBikeRide", "TrailRun")
+- `manual`: Boolean - `true` if manually entered (no GPS data)
+- `start_latlng`: `[lat, lng]` array for GPS activities, `[]` empty array for manual activities
+- `map.polyline`: Encoded polyline summary of the route
+
+**Activity Filtering**:
+- Virtual activities: Filter by checking if `type` starts with "Virtual"
+- Manual/no GPS: Filter by checking `manual == true` or `len(start_latlng) != 2`
+
+**Streams Endpoint** (`/activities/{id}/streams`):
+- Query params: `keys=latlng,time,altitude,distance,velocity_smooth`
+- Returns arrays of equal length, one value per GPS point
+
+**Sample API Responses**: `sample_strava_api_responses/` contains real Strava API response examples (virtual rides, manual activities, etc.) for reference when understanding API field structure.
+
 ## Environment Variables
 
 Required in `.env`:
