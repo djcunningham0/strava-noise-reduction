@@ -23,5 +23,5 @@ def strava_auth():
 
 @bp.get("/logout")
 def logout():
-    session.pop("user", None)
+    session.clear()  # Clear all session data including tokens
     return redirect(url_for("homepage"))

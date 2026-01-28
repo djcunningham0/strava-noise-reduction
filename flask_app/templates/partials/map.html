@@ -1,27 +1,36 @@
 <div id="map-container" class="relative">
-  {{ plot_div | safe }}
+    {{ plot_div | safe }}
 
-  <div class="mt-4 flex items-center justify-between">
-    <div class="flex items-center space-x-8 text-sm text-gray-600">
-      <div class="flex items-center">
-        <span class="inline-block w-4 h-1 bg-blue-500 mr-2"></span>
-        <span>Original GPS Track</span>
-      </div>
-      <div class="flex items-center">
-        <span class="inline-block w-4 h-1 bg-red-500 mr-2"></span>
-        <span>Kalman Smoothed</span>
-      </div>
-    </div>
+    <div class="mt-4 flex items-center justify-between">
+        <div class="flex items-center space-x-8 text-sm text-gray-600">
+            <div class="flex items-center text-xs">
+                <a
+                    href="https://www.strava.com"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="hover:opacity-80"
+                >
+                    <img
+                        src="{{ url_for('static', filename='images/strava/api-logo/api_logo_pwrdBy_strava_horiz_orange.svg') }}"
+                        alt="Strava"
+                        class="h-3"
+                    />
+                </a>
+            </div>
+        </div>
 
-    {% if smoothed_distance is defined %}
-    <div class="text-sm">
-      <span class="text-gray-500">Smoothed distance:</span>
-      <span class="font-semibold text-blue-600">{{ (smoothed_distance / 1609.34)|round(2) }} mi</span>
-      {% if original_distance is defined %}
-        {% set diff = ((original_distance - smoothed_distance) / original_distance * 100)|round(1) %}
-        <span class="text-gray-400 ml-1">({{ diff }}% shorter)</span>
-      {% endif %}
+        {% if smoothed_distance is defined %}
+        <div class="text-sm">
+            <span class="text-gray-500">Smoothed distance:</span>
+            <span class="font-semibold text-blue-600"
+                >{{ (smoothed_distance / 1609.34)|round(2) }} mi</span
+            >
+            {% if original_distance is defined %} {% set diff =
+            ((original_distance - smoothed_distance) / original_distance *
+            100)|round(1) %}
+            <span class="text-gray-400 ml-1">({{ diff }}% shorter)</span>
+            {% endif %}
+        </div>
+        {% endif %}
     </div>
-    {% endif %}
-  </div>
 </div>

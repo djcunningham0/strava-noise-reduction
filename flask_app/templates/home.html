@@ -163,13 +163,9 @@
         </p>
         <a
           href="{{ url_for('auth.login') }}"
-          style="background-color: #FC5200;"
-          class="inline-flex items-center px-6 py-3 hover:opacity-90 text-white font-medium rounded-lg transition-opacity"
+          class="inline-block hover:opacity-90 transition-opacity"
         >
-          <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 24 24">
-            <path d="M15.387 17.944l-2.089-4.116h-3.065L15.387 24l5.15-10.172h-3.066m-7.008-5.599l2.836 5.598h4.172L10.463 0l-7 13.828h4.169"/>
-          </svg>
-          Connect with Strava
+          <img src="{{ url_for('static', filename='images/strava/connect-with-strava/btn_strava_connect_with_orange.svg') }}" alt="Connect with Strava" class="h-12">
         </a>
       </div>
     </div>
