@@ -25,9 +25,26 @@ def get_stats() -> Dict[str, Any]:
     return call_strava_api(f"athletes/{athlete_id}/stats")
 
 
+def _has_gps_data(activity: Dict[str, Any]) -> bool:
+    """Check if activity has GPS data (not manually entered)."""
+    if activity.get("manual"):
+        return False
+    start_latlng = activity.get("start_latlng")
+    # start_latlng is [] for manual activities, [lat, lng] for GPS activities
+    return isinstance(start_latlng, list) and len(start_latlng) == 2
+
+
+def _is_virtual_activity(activity: Dict[str, Any]) -> bool:
+    """Check if activity is virtual (indoor trainer, etc.)."""
+    return activity.get("type", "").startswith("Virtual")
+
+
 @cached(activities_cache, key=lambda user_id: hashkey(user_id))
 def get_activities_for_user(user_id: int) -> List[Dict[str, Any]]:
-    """Fetch activities for a user (cached by user_id)."""
+    """Fetch activities for a user (cached by user_id).
+
+    Excludes virtual activities and activities without GPS data.
+    """
     activity_list = call_strava_api("activities")
     return [
         {
@@ -41,4 +58,5 @@ def get_activities_for_user(user_id: int) -> List[Dict[str, Any]]:
             "total_elevation_gain": x.get("total_elevation_gain", 0),
         }
         for x in activity_list
+        if _has_gps_data(x) and not _is_virtual_activity(x)
     ]
