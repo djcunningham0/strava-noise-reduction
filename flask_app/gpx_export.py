@@ -33,7 +33,7 @@ def create_gpx(
     gpx = gpxpy.gpx.GPX()
     gpx.name = name
     gpx.description = description
-    gpx.creator = "Strava Noise Reduction - Kalman Filter"
+    gpx.creator = "GPX Noise Reduction - Kalman Filter"
 
     # Create track
     gpx_track = gpxpy.gpx.GPXTrack()

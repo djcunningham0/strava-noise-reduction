@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>{% block title %}{% endblock %} - Strava Noise Reduction</title>
+  <title>{% block title %}{% endblock %} - GPX Noise Reduction</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/htmx.org@2.0.4"></script>
   <script src="https://cdn.plot.ly/plotly-3.0.1.min.js"></script>
@@ -18,20 +18,20 @@
   </style>
 </head>
 <body class="bg-gray-50 min-h-screen">
-  <nav class="bg-orange-600 text-white shadow-lg">
+  <nav class="bg-blue-600 text-white shadow-lg">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div class="flex justify-between h-16 items-center">
-        <a href="{{ url_for('homepage') }}" class="text-xl font-bold hover:text-orange-200 transition-colors">
-          Strava Noise Reduction
+        <a href="{{ url_for('homepage') }}" class="text-xl font-bold hover:text-blue-200 transition-colors">
+          GPX Noise Reduction
         </a>
         <div class="flex items-center space-x-4">
           {% if g.user %}
-            <span class="text-orange-100">{{ g.user['name'] }}</span>
-            <a href="{{ url_for('auth.logout') }}" class="bg-orange-700 hover:bg-orange-800 px-3 py-2 rounded-md text-sm font-medium transition-colors">
+            <span class="text-blue-100">{{ g.user['name'] }}</span>
+            <a href="{{ url_for('auth.logout') }}" class="bg-blue-700 hover:bg-blue-800 px-3 py-2 rounded-md text-sm font-medium transition-colors">
               Log Out
             </a>
           {% else %}
-            <a href="{{ url_for('auth.login') }}" class="bg-orange-700 hover:bg-orange-800 px-3 py-2 rounded-md text-sm font-medium transition-colors">
+            <a href="{{ url_for('auth.login') }}" class="bg-blue-700 hover:bg-blue-800 px-3 py-2 rounded-md text-sm font-medium transition-colors">
               Log In
             </a>
           {% endif %}
